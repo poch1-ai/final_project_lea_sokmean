@@ -1,0 +1,35 @@
+title,year,meyers_role,imdb_id,bom_slug,rt_slug,group,wiki_slug,imdb_rating,vote_count_num,runtime_mins,mpaa_rating,genres,budget_usd,box_office_usd,opening_usd,distributor,profit_margin_pct,roi_category,meyers_directed
+Private Benjamin,1980,"Writer, Producer",tt0080373,private-benjamin,private_benjamin,Meyers,Private_Benjamin,7.3,579,105,N/A,Drama,NA,NA,NA,NA,NA,NA,FALSE
+Irreconcilable Differences,1984,"Writer, Producer",tt0087564,irreconcilable-differences,irreconcilable_differences,Meyers,Irreconcilable_Differences_(film),6.6,535,120,N/A,"Crime, Drama, Romance",6000000,12400000,NA,Warner Bros.,106.66666666666667,Hit,FALSE
+Baby Boom,1987,"Writer, Producer",tt0092699,baby-boom,baby_boom,Meyers,Baby_Boom_(film),7.3,35553,133,R,"Comedy, Drama, Romance",15000000,26000000,NA,MGM/UA Communications Co.,73.33333333333333,Hit,FALSE
+Father of the Bride,1991,"Writer, Producer",tt0101862,father-of-the-bride,father_of_the_bride,Meyers,Father_of_the_Bride_(1991_film),6.6,92106,105,PG,"Comedy, Family, Romance",20000000,129000000,NA,Buena Vista Pictures Distribution,545,Hit,FALSE
+I Love Trouble,1994,"Writer, Producer",tt0110278,i-love-trouble,i_love_trouble,Meyers,I_Love_Trouble,7.1,685,85,N/A,Drama,NA,NA,NA,NA,NA,NA,FALSE
+Father of the Bride Part II,1995,"Writer, Director, Producer",tt0114692,father-of-the-bride-part-ii,father_of_the_bride_part_ii,Meyers,Father_of_the_Bride_Part_II,NA,NA,NA,NA,NA,40000000,103000000,NA,Buena Vista Pictures Distribution,157.5,Hit,TRUE
+The Parent Trap,1998,"Writer, Director, Producer",tt0120783,the-parent-trap,the_parent_trap,Meyers,The_Parent_Trap_(1998_film),6.7,165056,128,PG,"Adventure, Comedy, Drama",15000000,92100000,NA,Buena Vista Pictures Distribution,514,Hit,TRUE
+What Women Want,2000,"Director, Producer",tt0207201,what-women-want,what_women_want,Meyers,What_Women_Want_(film),6.5,236520,127,PG-13,"Comedy, Fantasy, Romance",NA,NA,NA,NA,NA,NA,TRUE
+Something's Gotta Give,2003,"Writer, Director, Producer",tt0337741,somethings-gotta-give,somethings_gotta_give,Meyers,Something%27s_Gotta_Give_(film),6.8,138041,128,PG-13,"Comedy, Drama, Romance",80000000,266700000,NA,"Sony Pictures Releasing (United States and Canada)
+Warner Bros. Pictures (International)",233.37500000000003,Hit,TRUE
+The Holiday,2006,"Writer, Director, Producer",tt0457939,the-holiday,the_holiday,Meyers,The_Holiday,7,365357,136,PG-13,"Comedy, Romance",85000000,205800000,NA,"Sony Pictures Releasing
+(United States and Canada)
+United International Pictures
+(international)",142.11764705882354,Hit,TRUE
+It's Complicated,2009,"Writer, Director, Producer",tt1178663,its-complicated,its_complicated,Meyers,It%27s_Complicated_(film),7.1,78348,93,PG-13,"Comedy, Romance",75000000,219100000,NA,Universal Pictures,192.13333333333333,Hit,TRUE
+The Intern,2015,"Writer, Director, Producer",tt2234222,the-intern,the_intern,Meyers,The_Intern_(2015_film),8.3,122681,1,TV-MA,"Drama, Sci-Fi, Thriller",35000000,195800000,NA,Warner Bros. Pictures,459.42857142857144,Hit,TRUE
+Notting Hill,1999,NA,tt0125439,notting-hill,notting_hill,Comparison,Notting_Hill_(film),7.2,380809,124,PG-13,"Comedy, Drama, Romance",42000000,364000000,NA,"Universal Pictures (Select territories)
+PolyGram Filmed Entertainment (International)",766.6666666666667,Hit,FALSE
+Bridget Jones's Diary,2001,NA,tt0243155,bridget-joness-diary,bridget_joness_diary,Comparison,Bridget_Jones%27s_Diary_(film),6.8,284343,97,R,"Comedy, Drama, Romance",25000000,282000000,NA,"Miramax Films (United States)
+Mars Distribution (France)
+United International Pictures (international)",1028,Hit,FALSE
+My Big Fat Greek Wedding,2002,NA,tt0259446,my-big-fat-greek-wedding,my_big_fat_greek_wedding,Comparison,My_Big_Fat_Greek_Wedding,6.6,150238,95,PG,"Comedy, Drama, Romance",5000000,368700000,NA,"IFC Films (United States)
+Equinox Films (Canada)",7273.999999999999,Hit,FALSE
+How to Lose a Guy in 10 Days,2003,NA,tt0343660,how-to-lose-a-guy-in-10-days,how_to_lose_a_guy_in_10_days,Comparison,How_to_Lose_a_Guy_in_10_Days_(film),6.8,413878,99,PG-13,"Comedy, Drama, Romance",NA,NA,NA,NA,NA,NA,FALSE
+13 Going on 30,2004,NA,tt0337563,13-going-on-30,13_going_on_30,Comparison,13_Going_on_30,6.3,246818,98,PG-13,"Comedy, Fantasy, Romance",37000000,96000000,NA,Sony Pictures Releasing,159.45945945945945,Hit,FALSE
+Hitch,2005,NA,tt0386588,hitch,hitch,Comparison,Hitch_(film),6.6,343989,118,PG-13,"Comedy, Romance",55000000,371500000,NA,Sony Pictures Releasing,575.4545454545455,Hit,FALSE
+The Devil Wears Prada,2006,NA,tt0458352,the-devil-wears-prada,the_devil_wears_prada,Comparison,The_Devil_Wears_Prada_(film),7,524526,109,PG-13,"Comedy, Drama",35000000,326700000,NA,20th Century Fox,833.4285714285714,Hit,FALSE
+Knocked Up,2007,NA,tt0478311,knocked-up,knocked_up,Comparison,Knocked_Up,6.9,397384,129,R,"Comedy, Romance",25000000,219900000,NA,Universal Pictures,779.6,Hit,FALSE
+Mamma Mia!,2008,NA,tt0382932,mamma-mia,mamma_mia,Comparison,Mamma_Mia!_(film),8.1,940588,111,G,"Animation, Adventure, Comedy",52000000,706400000,NA,Universal Pictures,1258.4615384615383,Hit,FALSE
+The Proposal,2009,NA,tt1041829,the-proposal,the_proposal,Comparison,The_Proposal_(2009_film),6.8,393239,108,PG-13,"Comedy, Drama, Romance",40000000,317400000,NA,Walt Disney StudiosMotion Pictures,693.5,Hit,FALSE
+"Crazy, Stupid, Love",2011,NA,tt1570728,crazy-stupid-love,crazy_stupid_love,Comparison,"Crazy,_Stupid,_Love.",7.4,601291,118,PG-13,"Comedy, Drama, Romance",50000000,145000000,NA,Warner Bros. Pictures,190,Hit,FALSE
+About Time,2013,NA,tt2219695,about-time,about_time,Comparison,About_Time_(film),NA,NA,30,N/A,Comedy,NA,NA,NA,NA,NA,NA,FALSE
+The Other Woman,2014,NA,tt2203939,the-other-woman,the_other_woman,Comparison,The_Other_Woman_(2014_film),6,157469,109,PG-13,"Comedy, Romance",40000000,196700000,NA,20th Century Fox[2],391.75,Hit,FALSE
+Trainwreck,2015,NA,tt3153910,trainwreck,trainwreck,Comparison,Trainwreck_(film),NA,NA,NA,NA,NA,35000000,140800000,NA,Universal Pictures,302.2857142857143,Hit,FALSE
