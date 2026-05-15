@@ -1,0 +1,360 @@
+---
+title: "The Meyers Effect"
+subtitle: "Scraping and Tidying"
+format: html
+editor: visual
+---
+
+## Loading Libraries\`
+
+```{r}
+# Load packages needed for scraping, tidying, and iteration
+library(tidyverse)
+library(stringr)
+library(httr2)
+library(httr)
+library(purrr)
+library(rvest)
+library(readr)
+library(polite)
+library(jsonlite)
+library(dplyr)
+```
+
+## Check Scraping Permissions
+
+Before scraping any site, we verify that robots.txt allows access.
+
+```{r}
+# Confirm scraping is permitted on our sources
+robotstxt::paths_allowed("https://www.imdb.com")
+robotstxt::paths_allowed("https://en.wikipedia.org")
+
+# Create a data directory to cache raw scraped files
+dir.create("data", showWarnings = FALSE)
+```
+
+## Define Film Lookup Tables
+
+We define two lookup tibbles — one for Meyers' full filmography (as writer, director, and/or producer), and one for our comparison rom-coms (chosen based on famous movies that compitted with Meyers' back then). These act as our "key" tables.
+
+```{r}
+# imdb_id: the tt-code from each film's IMDb URL
+# bom_slug: the path segment used in Box Office Mojo URLs
+# rt_slug:  the path segment used in Rotten Tomatoes URLs
+meyers_films <- tibble(
+  title        = c(
+    "Private Benjamin",
+    "Irreconcilable Differences",
+    "Baby Boom",
+    "Father of the Bride",
+    "I Love Trouble",
+    "Father of the Bride Part II",
+    "The Parent Trap",
+    "What Women Want",
+    "Something's Gotta Give",
+    "The Holiday",
+    "It's Complicated",
+    "The Intern"
+  ),
+  year         = c(1980, 1984, 1987, 1991, 1994, 1995, 1998, 2000, 2003, 2006, 2009, 2015),
+  meyers_role  = c(
+    "Writer, Producer",
+    "Writer, Producer",
+    "Writer, Producer",
+    "Writer, Producer",
+    "Writer, Producer",
+    "Writer, Director, Producer",
+    "Writer, Director, Producer",
+    "Director, Producer",
+    "Writer, Director, Producer",
+    "Writer, Director, Producer",
+    "Writer, Director, Producer",
+    "Writer, Director, Producer"
+  ),
+  imdb_id      = c(
+    "tt0080373", "tt0087564", "tt0092699", "tt0101862",
+    "tt0110278", "tt0114692", "tt0120783", "tt0207201",
+    "tt0337741", "tt0457939", "tt1178663", "tt2234222"
+  ),
+  bom_slug     = c(
+    "private-benjamin", "irreconcilable-differences", "baby-boom",
+    "father-of-the-bride", "i-love-trouble", "father-of-the-bride-part-ii",
+    "the-parent-trap", "what-women-want", "somethings-gotta-give",
+    "the-holiday", "its-complicated", "the-intern"
+  ),
+  rt_slug      = c(
+    "private_benjamin", "irreconcilable_differences", "baby_boom",
+    "father_of_the_bride", "i_love_trouble", "father_of_the_bride_part_ii",
+    "the_parent_trap", "what_women_want", "somethings_gotta_give",
+    "the_holiday", "its_complicated", "the_intern"
+  ),
+  group        = "Meyers"
+)
+
+#Comparison rom-coms lookup 
+comparison_films <- tibble(
+  title        = c(
+    "Notting Hill",
+    "Bridget Jones's Diary",
+    "My Big Fat Greek Wedding",
+    "How to Lose a Guy in 10 Days",
+    "13 Going on 30",
+    "Hitch",
+    "The Devil Wears Prada",
+    "Knocked Up",
+    "Mamma Mia!",
+    "The Proposal",
+    "Crazy, Stupid, Love",
+    "About Time",
+    "The Other Woman",
+    "Trainwreck"
+  ),
+  year         = c(1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2011, 2013, 2014, 2015),
+  meyers_role  = NA_character_,
+  imdb_id      = c(
+    "tt0125439", "tt0243155", "tt0259446", "tt0343660",
+    "tt0337563", "tt0386588", "tt0458352", "tt0478311",
+    "tt0382932", "tt1041829", "tt1570728", "tt2219695",
+    "tt2203939", "tt3153910"
+  ),
+  bom_slug     = c(
+    "notting-hill", "bridget-joness-diary", "my-big-fat-greek-wedding",
+    "how-to-lose-a-guy-in-10-days", "13-going-on-30", "hitch",
+    "the-devil-wears-prada", "knocked-up", "mamma-mia",
+    "the-proposal", "crazy-stupid-love", "about-time",
+    "the-other-woman", "trainwreck"
+  ),
+  rt_slug      = c(
+    "notting_hill", "bridget_joness_diary", "my_big_fat_greek_wedding",
+    "how_to_lose_a_guy_in_10_days", "13_going_on_30", "hitch",
+    "the_devil_wears_prada", "knocked_up", "mamma_mia",
+    "the_proposal", "crazy_stupid_love", "about_time",
+    "the_other_woman", "trainwreck"
+  ),
+  group        = "Comparison"
+)
+
+# Combine into one master lookup 
+all_films <- bind_rows(meyers_films, comparison_films)
+
+all_films
+```
+
+## Scrape IMDb Metadata
+
+```{r}
+omdb_key <- "d766c35e"
+
+fetch_omdb <- function(imdb_id, title) {
+  resp <- request("https://www.omdbapi.com/") |>
+    req_url_query(i = imdb_id, apikey = omdb_key) |>
+    req_perform() |>
+    resp_body_json()
+
+  if (resp$Response == "False") return(NULL)
+
+  tibble(
+    imdb_id      = imdb_id,
+    title        = title,
+    imdb_rating  = parse_number(resp$imdbRating),
+    vote_count   = parse_number(resp$imdbVotes),
+    runtime_mins = parse_number(resp$Runtime),
+    mpaa_rating  = resp$Rated,
+    genres       = resp$Genre
+  )
+}
+
+imdb_data <- map2(all_films$imdb_id, all_films$title, fetch_omdb) |>
+  bind_rows()
+
+```
+
+## Scrape Financial Data from Wikipedia
+
+Since Box Office Mojo and Rotten Tomatoes both render their content via JavaScript, which means `rvest` receives a skeleton page with no actual data in it, we use Wikipedia's film infoboxes that are plain static HTML and contain the same financial figures drawn from the same primary sources, and works better with `rvest`.
+
+Wikipedia infoboxes are two-column HTML tables where each row is a `<tr>` containing a `<th>` (label) and a `<td>` (value).
+
+```{r}
+# Walks each <tr> in the infobox, checks if its <th> matches our pattern,
+# and returns the paired <td> text. This is alignment-safe regardless of
+# how many image/caption rows appear in the infobox.
+get_infobox_value <- function(infobox, pattern) {
+  rows <- infobox |> html_elements("tr")
+  for (row in rows) {
+    label <- row |> html_element("th") |> html_text2()
+    if (!is.na(label) && str_detect(label, regex(pattern, ignore_case = TRUE))) {
+      value <- row |> html_element("td") |> html_text2()
+      return(value)
+    }
+  }
+  return(NA_character_)
+}
+
+# scrape one Wikipedia film infobox
+scrape_wiki_financials <- function(wiki_slug, title) {
+  url     <- str_c("https://en.wikipedia.org/wiki/", wiki_slug)
+  session <- bow(url, user_agent = "Educational scraping project / DS 334")
+  page    <- scrape(session)
+  
+  # Some articles use .infobox-film, others just .infobox
+  infobox <- page |> html_element(".infobox-film, .infobox")
+  
+  # Guard: if no infobox found at all, return NAs rather than crash map2
+  if (is.null(infobox) || inherits(infobox, "xml_missing")) {
+    warning(str_c("No infobox found for: ", title, " (slug: ", wiki_slug, ")"))
+    return(tibble(
+      wiki_slug = wiki_slug, title = title,
+      budget_raw = NA_character_, box_office_raw = NA_character_,
+      opening_raw = NA_character_, distributor = NA_character_
+    ))
+  }
+  
+  tibble(
+    wiki_slug      = wiki_slug,
+    title          = title,
+    budget_raw     = get_infobox_value(infobox, "Budget"),
+    box_office_raw = get_infobox_value(infobox, "Box office"),
+    opening_raw    = get_infobox_value(infobox, "Opening"),
+    distributor    = get_infobox_value(infobox, "Distributed by|Distribution")
+  )
+}
+
+# Add Wikipedia slugs to the lookup table 
+# Slugs must match the exact Wikipedia article title (underscores, disambiguation).
+# Verify each slug by visiting en.wikipedia.org/wiki/<slug> in a browser if unsure.
+# Note: apostrophes in URLs should be encoded as %27
+meyers_films <- meyers_films |>
+  mutate(wiki_slug = c(
+    "Private_Benjamin",
+    "Irreconcilable_Differences_(film)",
+    "Baby_Boom_(film)",
+    "Father_of_the_Bride_(1991_film)",
+    "I_Love_Trouble",
+    "Father_of_the_Bride_Part_II",
+    "The_Parent_Trap_(1998_film)",
+    "What_Women_Want_(film)",
+    "Something%27s_Gotta_Give_(film)",
+    "The_Holiday",
+    "It%27s_Complicated_(film)",
+    "The_Intern_(2015_film)"
+  ))
+
+comparison_films <- comparison_films |>
+  mutate(wiki_slug = c(
+    "Notting_Hill_(film)",
+    "Bridget_Jones%27s_Diary_(film)",
+    "My_Big_Fat_Greek_Wedding",
+    "How_to_Lose_a_Guy_in_10_Days_(film)",
+    "13_Going_on_30",
+    "Hitch_(film)",
+    "The_Devil_Wears_Prada_(film)",
+    "Knocked_Up",
+    "Mamma_Mia!_(film)",
+    "The_Proposal_(2009_film)",
+    "Crazy,_Stupid,_Love.",        
+    "About_Time_(film)",
+    "The_Other_Woman_(2014_film)",
+    "Trainwreck_(film)"
+  ))
+
+# Rebuild master lookup with wiki_slug included
+all_films <- bind_rows(meyers_films, comparison_films)
+
+# Iterate over all films 
+
+safe_scrape_wiki <- possibly(scrape_wiki_financials, otherwise = tibble(
+  wiki_slug = NA_character_, title = NA_character_,
+  budget_raw = NA_character_, box_office_raw = NA_character_,
+  opening_raw = NA_character_, distributor = NA_character_
+))
+
+wiki_raw  <- map2(all_films$wiki_slug, all_films$title, safe_scrape_wiki)
+wiki_data <- bind_rows(wiki_raw)
+
+#  check which films are missing financial data?
+wiki_data |> filter(is.na(budget_raw) | is.na(box_office_raw)) |> select(title, wiki_slug)
+
+wiki_data
+```
+
+## Tidy and Merge All Sources
+
+We use `left_join` to combine all scraped sources with our master lookup table. Dollar strings are cleaned with `parse_number()` .
+
+```{r}
+# clean financial columns from Wikipedia infoboxes 
+wiki_clean <- wiki_data |>
+  mutate(across(c(budget_raw, box_office_raw, opening_raw),
+                ~ str_remove_all(.x, "\\[\\d+\\]"))) |>
+  mutate(
+    budget_usd     = parse_number(budget_raw),
+    box_office_usd = parse_number(box_office_raw),
+    opening_usd    = parse_number(opening_raw),
+    budget_usd     = if_else(budget_usd < 10000, budget_usd * 1e6, budget_usd),
+    box_office_usd = if_else(box_office_usd < 10000, box_office_usd * 1e6, box_office_usd)
+  ) |>
+  select(wiki_slug, title, budget_usd, box_office_usd, opening_usd, distributor)
+
+#  rename vote_count 
+imdb_clean <- imdb_data |>
+  rename(vote_count_num = vote_count)
+
+#  join IMDb and Wikipedia data to the master lookup 
+films_tbl <- all_films |>
+  left_join(imdb_clean, by = c("imdb_id", "title")) |>
+  left_join(wiki_clean, by = c("wiki_slug", "title"))
+
+#  derive computed variables 
+films_tbl <- films_tbl |>
+  mutate(
+    profit_margin_pct = ((box_office_usd - budget_usd) / budget_usd) * 100,
+    roi_category = case_when(
+      profit_margin_pct >= 50 ~ "Hit",
+      profit_margin_pct >= 0  ~ "Break-even",
+      profit_margin_pct <  0  ~ "Flop",
+      TRUE                    ~ NA_character_
+    ),
+    meyers_directed = str_detect(replace_na(meyers_role, ""), "Director")
+  )
+
+films_tbl
+```
+
+## Build Supplementary Tibbles
+
+Some variables are not one-to-one with films. We unnested them into separate tidy tibbles for use in specific visualizations.
+
+```{r}
+# genre_tbl
+genre_tbl <- films_tbl |>
+  select(title, year, group, genres) |>
+  filter(!is.na(genres)) |>
+  mutate(genre = str_split(genres, ",\\s*")) |>
+  unnest(genre) |>
+  select(-genres)
+
+genre_tbl
+
+# role_tbl
+role_tbl <- films_tbl |>
+  filter(group == "Meyers") |>
+  select(title, year, meyers_role) |>
+  mutate(role = str_split(meyers_role, ",\\s*")) |>
+  unnest(role) |>
+  mutate(role = str_trim(role)) |>
+  select(-meyers_role)
+
+role_tbl
+```
+
+```{r}
+
+write_csv(films_tbl,  "data/films_tbl.csv")
+write_csv(genre_tbl,  "data/genre_tbl.csv")
+write_csv(role_tbl,   "data/role_tbl.csv")
+write_csv(imdb_clean,  "data/imdb_data.csv")
+write_csv(wiki_clean,  "data/wiki_data.csv")
+
+```
